@@ -81,9 +81,22 @@ async def on_audio_end(elements: list[ElementBased]):
     ).send()
 
 @cl.on_message
-async def stop_message(message: str):
+async def handle_message(message):
+    if message.content.startswith("oauth:"):
+        user_name = message.content.split(":")[1]
+        try:
+            cl.user_session.set('user_name', user_name)
+        except cl.ChainlitContextException:
+            print("Chainlit context is not available.")
     if message.content == "":
         pass
     else:
         await cl.Message(content = "Please give input through voice").send()
+
+@cl.on_chat_start
+async def greet_user():
+    user_name = cl.user_session.get('user_name', 'there')
+    greeting = f"Hello {user_name}, I'm your virtual assistant! How can I assist you today?"
+    await cl.Message(content=greeting).send()
+
 
